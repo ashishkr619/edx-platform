@@ -100,7 +100,7 @@ class OutlineTabView(RetrieveAPIView):
 
         course_blocks = get_course_blocks(request.user, course_usage_key, transformers, include_completion=True)
 
-        dates_widget = { #information for the dates widget
+        dates_widget = {  # information for the dates widget
             'course_date_blocks': [block for block in date_blocks if not isinstance(block, TodaysDate)],
             'dates_tab_link': dates_tab_link,
             'user_timezone': user_timezone,
