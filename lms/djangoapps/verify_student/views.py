@@ -37,8 +37,8 @@ from lms.djangoapps.verify_student.image import InvalidImageData, decode_image_d
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification, VerificationDeadline
 from lms.djangoapps.verify_student.services import IDVerificationService
 from lms.djangoapps.verify_student.ssencrypt import has_valid_signature
-from lms.djangoapps.verify_student.tasks import send_verification_status_email, send_verification_approved_email
-from lms.djangoapps.verify_student.utils import can_verify_now
+from lms.djangoapps.verify_student.tasks import send_verification_status_email
+from lms.djangoapps.verify_student.utils import can_verify_now, send_verification_confirmation_email
 from openedx.core.djangoapps.commerce.utils import ecommerce_api_client
 from openedx.core.djangoapps.embargo import api as embargo_api
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
@@ -1031,6 +1031,9 @@ class SubmitPhotosView(View):
         Send an email confirming that the user submitted photos
         for initial verification.
         """
+        if use_new_templates_for_id_verification_emails():
+            send_verification_confirmation_email()
+
         context = {
             'full_name': user.profile.name,
             'platform_name': configuration_helpers.get_value("PLATFORM_NAME", settings.PLATFORM_NAME)

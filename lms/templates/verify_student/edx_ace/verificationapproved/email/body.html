@@ -11,13 +11,16 @@
       </h1>
       <p style="color: rgba(0,0,0,.75);">
         {% filter force_escape %}
-        {% blocktrans %}Hello {{ full_name }},{% endblocktrans %}
+          {% blocktrans %}Hello {{ full_name }},{% endblocktrans %}
         {% endfilter %}
-        <br/>
+      </p>
+      <p style="color: rgba(0,0,0,.75);">
         {% filter force_escape %}
-        {% blocktrans %}Your {{ platform_name }} ID verification photos have been approved. Your
-        approval status remains valid for one year, and it will expire DATE {{ expiry_date }}.
-        {% endblocktrans %}
+          {% blocktrans %}Your {{ platform_name }} ID verification photos have been approved.{% endblocktrans %}
+        {% endfilter %}
+
+        {% filter force_escape %}
+          {% blocktrans %}Your approval status remains valid for one year, and it will expire DATE {{ expiry_date }}.{% endblocktrans %}
         {% endfilter %}
         <br/>
       </p>
@@ -26,7 +29,7 @@
         {% trans "Enjoy your studies," as tmsg %}{{ tmsg | force_escape }}
         <br/>
         {% filter force_escape %}
-        {% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+          {% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
         {% endfilter %}
       </p>
 

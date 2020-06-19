@@ -24,3 +24,15 @@ class VerificationApproved(BaseMessageType):
     def __init__(self, *args, **kwargs):
         super(VerificationApproved, self).__init__(*args, **kwargs)
         self.options['transactional'] = True
+
+
+class VerificationSubmitted(BaseMessageType):
+    """
+    A message for _registered_ learners who have been both invited and enrolled to a course.
+    """
+    APP_LABEL = 'verify_student'
+    Name = 'verificationsubmitted'
+
+    def __init__(self, *args, **kwargs):
+        super(VerificationSubmitted, self).__init__(*args, **kwargs)
+        self.options['transactional'] = True

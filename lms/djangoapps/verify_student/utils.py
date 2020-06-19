@@ -7,9 +7,16 @@ import datetime
 import logging
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.utils.timezone import now
 from six import text_type
+from edx_ace import ace
+from edx_ace.recipient import Recipient
 
+from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
+from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from lms.djangoapps.verify_student.message_types import VerificationSubmitted, VerificationApproved
 from lms.djangoapps.verify_student.tasks import send_request_to_ss_for_user
 
 log = logging.getLogger(__name__)
@@ -161,3 +168,53 @@ def can_verify_now(verification_status, expiration_datetime):
             and is_verification_expiring_soon(expiration_datetime)
         )
     )
+
+
+def send_verification_confirmation_email(context):
+    from openedx.core.lib.celery.task_utils import emulate_http_request
+    from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
+
+    site = Site.objects.get_current()
+    message_context = get_base_template_context(site)
+    message_context.update(context)
+    user = User.objects.get(id=context['user_id'])
+    try:
+        with emulate_http_request(site=site, user=user):
+
+            msg = VerificationSubmitted(context=message_context).personalize(
+                recipient=Recipient(user.username, user.email),
+                language=get_user_preference(user, LANGUAGE_KEY),
+                user_context={'full_name': user.profile.name}
+            )
+            ace.send(msg)
+            log.info('Verification confirmation email sent to user: %r', user.username)
+            return True
+    except Exception:  # pylint: disable=broad-except
+        log.exception('Could not send email for verification confirmation to user %s', user.username)
+        return False
+
+
+def send_verification_approved_email(context):
+    """
+    Sends email to a learner when ID verification has been approved.
+    """
+    from openedx.core.lib.celery.task_utils import emulate_http_request
+    from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
+
+    site = Site.objects.get_current()
+    message_context = get_base_template_context(site)
+    message_context.update(context)
+    user = User.objects.get(id=context['user_id'])
+    try:
+        with emulate_http_request(site=site, user=user):
+            msg = VerificationApproved(context=message_context).personalize(
+                recipient=Recipient(user.username, user.email),
+                language=get_user_preference(user, LANGUAGE_KEY),
+                user_context={'full_name': user.profile.name}
+            )
+            ace.send(msg)
+            log.info('Verification approved email sent to user: %r', user.username)
+            return True
+    except Exception:  # pylint: disable=broad-except
+        log.exception('Could not send email for verification approved to user %s', user.username)
+        return False
