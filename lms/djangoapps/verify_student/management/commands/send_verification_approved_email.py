@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
-from verify_student import tasks
+from verify_student.tasks import send_verification_approved_email
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,6 @@ class Command(BaseCommand):
         expiry_date = datetime.date.today() + datetime.timedelta(
             days=settings.VERIFY_STUDENT["DAYS_GOOD_FOR"]
         )
-        task_id = tasks.send_verification_approved_email.delay(
+        task_id = send_verification_approved_email.delay(
             context={'user_id': user.id, 'expiry_date': expiry_date.strftime("%m/%d/%Y")})
         logger.info('2. Email sending to user: {}, task ID: {}'.format(username, task_id))

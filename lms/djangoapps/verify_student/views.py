@@ -37,7 +37,7 @@ from lms.djangoapps.verify_student.image import InvalidImageData, decode_image_d
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification, VerificationDeadline
 from lms.djangoapps.verify_student.services import IDVerificationService
 from lms.djangoapps.verify_student.ssencrypt import has_valid_signature
-from lms.djangoapps.verify_student import tasks
+from lms.djangoapps.verify_student.tasks import send_verification_status_email, send_verification_approved_email
 from lms.djangoapps.verify_student.utils import can_verify_now
 from openedx.core.djangoapps.commerce.utils import ecommerce_api_client
 from openedx.core.djangoapps.embargo import api as embargo_api
@@ -1146,7 +1146,7 @@ def results_callback(request):
         )
         if use_new_templates_for_id_verification_emails():
             context = {'user_id': user.id, 'expiry_date': expiry_date.strftime("%m/%d/%Y")}
-            tasks.send_verification_approved_email.delay(context=context)
+            send_verification_approved_email.delay(context=context)
         else:
             verification_status_email_vars['expiry_date'] = expiry_date.strftime("%m/%d/%Y")
             verification_status_email_vars['full_name'] = user.profile.name
@@ -1159,7 +1159,7 @@ def results_callback(request):
                 'email': user.email,
                 'email_vars': verification_status_email_vars
             }
-            tasks.send_verification_status_email.delay(context)
+            send_verification_status_email.delay(context)
 
     elif result == "FAIL":
         log.debug(u"Denying verification for %s", receipt_id)
@@ -1178,7 +1178,7 @@ def results_callback(request):
             'email': user.email,
             'email_vars': verification_status_email_vars
         }
-        tasks.send_verification_status_email.delay(context)
+        send_verification_status_email.delay(context)
 
     elif result == "SYSTEM FAIL":
         log.debug(u"System failure for %s -- resetting to must_retry", receipt_id)
