@@ -24,7 +24,7 @@
         {% trans "We have received your photos and they will be reviewed within 2-3 days." as tmsg %}{{ tmsg | force_escape }}
 
       {% filter force_escape %}
-        {% blocktrans with "https://courses.edx.org/dashboard" as link %}You may check the status on your dashboard: <a href="{{ link }}">{link}</a> {% endblocktrans %}
+        {% blocktrans with "https://courses.edx.org/dashboard" as link %}You may check the status on your dashboard: {{link}} {% endblocktrans %}
       {% endfilter %}
       </p>
 
