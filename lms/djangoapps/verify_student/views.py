@@ -1032,7 +1032,7 @@ class SubmitPhotosView(View):
         for initial verification.
         """
         if use_new_templates_for_id_verification_emails():
-            send_verification_confirmation_email()
+            send_verification_confirmation_email({'user_id': user.id})
 
         context = {
             'full_name': user.profile.name,
